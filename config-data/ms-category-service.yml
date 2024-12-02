@@ -9,9 +9,9 @@ spring:
     show-sql: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/ms_category
+    url: jdbc:mysql://localhost:3306/jdcy_category
     username: root
-    password: ""
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 springdoc:
