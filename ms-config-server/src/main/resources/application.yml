@@ -1,5 +1,5 @@
 server:
-  port: 7070
+  port: 2011
 spring:
   application:
     name: config-server
@@ -7,12 +7,6 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/danielccanayucra/DAD.2024.DANIEL.git # ruta del repositorio git
+          uri: https://github.com/danielccanayucra/ExamenParcialDeDAD.git # ruta del repositorio git
           searchPaths: config-data
-          default-label: practica
-  security:
-    user:
-      name: root
-      password: 123456
-
-
+          default-label: main
