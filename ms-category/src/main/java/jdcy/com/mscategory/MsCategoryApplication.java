@@ -13,6 +13,7 @@ public class MsCategoryApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MsCategoryApplication.class, args);
 	}
+
 	@Bean
 	public OpenAPI customOpenAPI() {
 		return new OpenAPI().info(new Info()
