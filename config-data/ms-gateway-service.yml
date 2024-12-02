@@ -1,0 +1,21 @@
+server:
+  port: 2711
+eureka:
+  client:
+    serviceUrl:
+      #defaultZone: http://localhost:1027/eureka
+      defaultZone: ${EUREKA_URI:http://localhost:1027/eureka}
+  instance:
+    #hostname: localhost
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enable: true
+      routes:
+        - id: ms-category-service
+          uri: lb://ms-category-service
+          predicates:
+            - Path=/category/**
