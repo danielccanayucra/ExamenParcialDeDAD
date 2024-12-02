@@ -3,6 +3,7 @@ package jdcy.com.msproducto.service.impl;
 import jdcy.com.msproducto.dto.CategoryDto;
 import jdcy.com.msproducto.dto.ProductoDto;
 import jdcy.com.msproducto.entity.Producto;
+import jdcy.com.msproducto.exeption.ResourceNotFoundException;
 import jdcy.com.msproducto.feign.CategoryFeign;
 import jdcy.com.msproducto.repository.ProductoRepository;
 import jdcy.com.msproducto.service.ProductoService;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 public class ProductoServiceImpl implements ProductoService {
     @Autowired
@@ -23,25 +25,18 @@ public class ProductoServiceImpl implements ProductoService {
     private CategoryFeign categoryFeign;
 
     @Override
-    public List<ProductoDto> list() {
+    public List<Producto> list() {
         List<Producto> products = productoRepository.findAll();
-        List<ProductoDto> productDtos = new ArrayList<>();
 
-        for (Producto product : products) {
-            ProductoDto productDto = mapToDto(product);
-
-            // Llamada a Feign para obtener detalles de la categoría
-            if (product.getCategoryId() != null) {
-                ResponseEntity<CategoryDto> categoryResponse = categoryFeign.getById(product.getCategoryId());
-                if (categoryResponse.getStatusCode().is2xxSuccessful() && categoryResponse.getBody() != null) {
-                    productDto.setCategoryDto(categoryResponse.getBody());
-                }
+        for (Producto producto : products) {
+            // Obtener los detalles del cliente
+            ResponseEntity<CategoryDto> categoryResponse = categoryFeign.getById(producto.getCategoryId());
+            if (categoryResponse.getStatusCode().is2xxSuccessful() && categoryResponse.getBody() != null) {
+                producto.setCategoryDto(categoryResponse.getBody());
             }
-
-            productDtos.add(productDto);
         }
 
-        return productDtos;
+        return products;
     }
     @Override
     public Optional<ProductoDto> findById(Integer id) {
@@ -60,25 +55,22 @@ public class ProductoServiceImpl implements ProductoService {
         });
     }
 
-    public ProductoDto save(ProductoDto productDto) {
-        // Mapear el DTO a una entidad
-        Producto product = mapToEntity(productDto);
-
-        // Guardar el producto en la base de datos
-        Producto savedProduct = productoRepository.save(product);
-
-        // Mapear la entidad guardada de nuevo al DTO
-        ProductoDto savedProductDto = mapToDto(savedProduct);
-
-        // Llamar a Feign para obtener los detalles de la categoría si existe
-        if (savedProduct.getCategoryId() != null) {
-            ResponseEntity<CategoryDto> categoryResponse = categoryFeign.getById(savedProduct.getCategoryId());
-            if (categoryResponse.getStatusCode().is2xxSuccessful() && categoryResponse.getBody() != null) {
-                savedProductDto.setCategoryDto(categoryResponse.getBody());
-            }
+    public Producto save(Producto producto) {
+        // Verificar si el categoria existe
+        ResponseEntity<CategoryDto> categoryResponse = categoryFeign.getById(producto.getCategoryId());
+        if (!categoryResponse.getStatusCode().is2xxSuccessful() || categoryResponse.getBody() == null) {
+            throw new ResourceNotFoundException("Cliente no encontrado con ID: " + producto.getCategoryId());
         }
 
-        return savedProductDto;
+        CategoryDto categoryDto = categoryResponse.getBody();
+        producto.setCategoryDto(categoryDto);
+
+
+        // Guardar el producto en la base de datos
+        Producto savedProduct = productoRepository.save(producto);
+
+
+        return savedProduct;
     }
 
     @Override

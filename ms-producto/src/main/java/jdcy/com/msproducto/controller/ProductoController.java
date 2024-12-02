@@ -1,6 +1,10 @@
 package jdcy.com.msproducto.controller;
 
+import jakarta.validation.Valid;
 import jdcy.com.msproducto.dto.ProductoDto;
+import jdcy.com.msproducto.dto.ProductoRequestDto;
+import jdcy.com.msproducto.dto.ProductoResponseDto;
+import jdcy.com.msproducto.entity.Producto;
 import jdcy.com.msproducto.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +22,7 @@ public class ProductoController {
     private ProductoService productoService;
 
     @GetMapping
-    public ResponseEntity<List<ProductoDto>> listAllProducts() {
+    public ResponseEntity<List<Producto>> list() {
         return ResponseEntity.ok(productoService.list());
     }
 
@@ -30,9 +34,28 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductoDto> saveProduct(@RequestBody ProductoDto productDto) {
-        ProductoDto savedProduct = productoService.save(productDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
+    public ResponseEntity<ProductoResponseDto> create(@RequestBody @Valid ProductoRequestDto productoRequestDto) {
+        Producto producto = new Producto();
+        producto.setName(productoRequestDto.getName());
+        producto.setDescription(productoRequestDto.getDescription());
+        producto.setCode(productoRequestDto.getCode());
+        producto.setPrecio(productoRequestDto.getPrecio());
+        producto.setStock(productoRequestDto.getStock());
+        producto.setCategoryId(productoRequestDto.getCategoryId());
+
+        Producto savedProducto = productoService.save(producto);
+
+        // Mapear la entidad guardada al DTO de respuesta
+        ProductoResponseDto responseDTO = new ProductoResponseDto();
+        responseDTO.setId(savedProducto.getId());
+        responseDTO.setName(savedProducto.getName());
+        responseDTO.setDescription(savedProducto.getDescription());
+        responseDTO.setCode(savedProducto.getCode());
+        responseDTO.setPrecio(savedProducto.getPrecio());
+        responseDTO.setStock(savedProducto.getStock());
+        responseDTO.setCategoryId(savedProducto.getCategoryId());
+
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PutMapping("/{id}")
